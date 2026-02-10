@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
-import { AuthForm } from './auth-form'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 interface AuthGuardProps {
   children: React.ReactNode
@@ -10,7 +10,14 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children }: AuthGuardProps) {
   const { user, loading } = useAuth()
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
+  const router = useRouter()
+
+  // Redirect unauthenticated users to auth page
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/auth')
+    }
+  }, [user, loading, router])
 
   if (loading) {
     return (
@@ -20,13 +27,9 @@ export function AuthGuard({ children }: AuthGuardProps) {
     )
   }
 
+  // Don't render protected content for unauthenticated users
   if (!user) {
-    return (
-      <AuthForm 
-        mode={authMode} 
-        onToggleMode={() => setAuthMode(mode => mode === 'signin' ? 'signup' : 'signin')} 
-      />
-    )
+    return null
   }
 
   return <>{children}</>

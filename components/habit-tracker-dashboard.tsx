@@ -2,12 +2,15 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { DashboardHeader } from "@/components/dashboard-header"
 import { HabitList } from "@/components/habit-list"
 import { HabitGrid } from "@/components/habit-grid"
 import { MonthlyProgress } from "@/components/monthly-progress"
 import { DayClassificationChart } from "@/components/day-classification-chart"
 import { AnalyticsCharts } from "@/components/analytics-charts"
+import { useAuth } from "@/lib/auth-context"
+import { Power } from "lucide-react"
 import type { Habit, CompletionMatrix } from "@/lib/types"
 import { getDaysInMonth, getFirstDayOfMonth, isToday, isYesterday, formatDate } from "@/lib/date-utils"
 import {
@@ -39,6 +42,7 @@ export default function HabitTrackerDashboard() {
   const today = useMemo(() => new Date(), [])
   const [selectedMonth, setSelectedMonth] = useState(today.getMonth())
   const [selectedYear] = useState(today.getFullYear())
+  const { signOut } = useAuth()
   const [habits, setHabits] = useState<Habit[]>([])
   const [completions, setCompletions] = useState<CompletionMatrix>({})
   const [loading, setLoading] = useState(true)
@@ -334,20 +338,32 @@ export default function HabitTrackerDashboard() {
           <>
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <div className="w-1/4 flex items-center justify-center">
+              <div className="flex items-center">
                 <h1 className="text-3xl font-bold tracking-tight text-foreground">Daily Dashboard</h1>
               </div>
-              {/* Summary Metrics */}
-              <DashboardHeader
-                currentStreak={currentStreak}
-                lastPerfectDay={lastPerfectDay ? formatDate(lastPerfectDay) : "N/A"}
-                disciplineScore={disciplineScore}
-            selectedMonth={MONTHS[selectedMonth]}
-            selectedMonthIndex={selectedMonth}
-            onMonthChange={setSelectedMonth}
-            availableMonths={MONTHS}
-          />
-        </div>
+              {/* Right Side - Metrics and Logout */}
+              <div className="flex items-center gap-4">
+                {/* Summary Metrics */}
+                <DashboardHeader
+                  currentStreak={currentStreak}
+                  lastPerfectDay={lastPerfectDay ? formatDate(lastPerfectDay) : "N/A"}
+                  disciplineScore={disciplineScore}
+                  selectedMonth={MONTHS[selectedMonth]}
+                  selectedMonthIndex={selectedMonth}
+                  onMonthChange={setSelectedMonth}
+                  availableMonths={MONTHS}
+                />
+                {/* Logout Button */}
+                <Button
+                  onClick={signOut}
+                  size="sm"
+                  variant="ghost"
+                  className="text-red-500 hover:text-red-600 hover:bg-red-50 p-2"
+                >
+                  <Power className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
 
         {/* Main Grid Section */}
         <Card className="bg-background rounded-none border-border pt-5 pb-5">
