@@ -66,9 +66,9 @@ export function HabitGrid({
                 disabled={!clickable}
                 className={cn(
                   "w-6 h-6 rounded-sm transition-colors",
-                  completed ? "bg-emerald-500" : future ? "bg-muted/30" : "bg-muted",
+                  completed ? "bg-green-500" : future ? "bg-muted/30" : "bg-muted",
                   clickable && !completed && "hover:bg-muted-foreground/30 cursor-pointer",
-                  clickable && completed && "hover:bg-emerald-400 cursor-pointer",
+                  clickable && completed && "hover:bg-green-400 cursor-pointer",
                   !clickable && "cursor-default",
                 )}
                 title={clickable ? `Toggle ${habit.name} for day ${day}` : future ? "Future day" : "Read-only"}

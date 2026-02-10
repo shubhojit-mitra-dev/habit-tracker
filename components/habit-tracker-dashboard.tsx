@@ -18,7 +18,7 @@ import {
   getHabitsCompletedPerDay,
   getDailyDisciplineScores,
 } from "@/lib/habit-utils"
-import { getHabits, createHabit, updateHabit } from "@/lib/actions"
+import { getHabits, createHabit, updateHabit, toggleCompletion, getCompletions } from "@/lib/actions"
 
 const MONTHS = [
   "January",
@@ -48,24 +48,31 @@ export default function HabitTrackerDashboard() {
   // Ref for debouncing habit updates
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Load habits from database
+  // Load habits and completions from database
   useEffect(() => {
-    async function loadHabits() {
+    async function loadData() {
       try {
         setLoading(true)
         setError(null)
-        const userHabits = await getHabits()
+        
+        // Load habits and completions in parallel
+        const [userHabits, completionsData] = await Promise.all([
+          getHabits(),
+          getCompletions()
+        ])
+        
         setHabits(userHabits)
+        setCompletions(completionsData)
       } catch (err) {
-        console.error('Failed to load habits:', err)
-        setError('Failed to load habits. Please try refreshing the page.')
+        console.error('Failed to load data:', err)
+        setError('Failed to load data. Please try refreshing the page.')
       } finally {
         setLoading(false)
       }
     }
 
-    loadHabits()
-  }, [])
+    loadData()
+  }, [selectedYear, selectedMonth]) // Reload when month/year changes
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -122,23 +129,58 @@ export default function HabitTrackerDashboard() {
 
   // Handlers
   const handleToggleCompletion = useCallback(
-    (habitId: string, day: number) => {
+    async (habitId: string, day: number) => {
       const date = new Date(selectedYear, selectedMonth, day)
       if (!isToday(date) && !isYesterday(date)) return
 
       const dateKey = `${selectedYear}-${selectedMonth}-${day}`
+      const completionKey = `${habitId}-${dateKey}`
+      
+      // Optimistic update - update UI immediately
+      const wasCompleted = !!completions[completionKey]
       setCompletions((prev) => {
-        const key = `${habitId}-${dateKey}`
         const newCompletions = { ...prev }
-        if (newCompletions[key]) {
-          delete newCompletions[key]
+        if (wasCompleted) {
+          delete newCompletions[completionKey]
         } else {
-          newCompletions[key] = true
+          newCompletions[completionKey] = true
         }
         return newCompletions
       })
+
+      try {
+        // Update database
+        const success = await toggleCompletion(habitId, date)
+        
+        if (!success) {
+          // Revert optimistic update on failure
+          setCompletions((prev) => {
+            const newCompletions = { ...prev }
+            if (wasCompleted) {
+              newCompletions[completionKey] = true
+            } else {
+              delete newCompletions[completionKey]
+            }
+            return newCompletions
+          })
+          setError('Failed to update habit completion. Please try again.')
+        }
+      } catch (err) {
+        console.error('Failed to toggle completion:', err)
+        // Revert optimistic update on error
+        setCompletions((prev) => {
+          const newCompletions = { ...prev }
+          if (wasCompleted) {
+            newCompletions[completionKey] = true
+          } else {
+            delete newCompletions[completionKey]
+          }
+          return newCompletions
+        })
+        setError('Failed to update habit completion. Please try again.')
+      }
     },
-    [selectedYear, selectedMonth],
+    [selectedYear, selectedMonth, completions],
   )
 
   const handleAddHabit = useCallback(async () => {
