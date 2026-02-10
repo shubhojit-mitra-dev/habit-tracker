@@ -166,12 +166,14 @@ export async function getCompletions(): Promise<Record<string, boolean>> {
     const completions: Record<string, boolean> = {}
     
     for (const completion of data || []) {
-      // Parse the date string directly instead of creating Date object to avoid timezone issues
+      // Parse the date string directly to avoid timezone issues
       const dateStr = completion.completed_date // Already in YYYY-MM-DD format
       const [year, month, day] = dateStr.split('-').map(Number)
-      const dateKey = `${year}-${month - 1}-${day}` // month - 1 because JS months are 0-based
+      // Keep month as-is since the database stores 1-based months but we need 0-based for the dateKey
+      const dateKey = `${year}-${month - 1}-${day}` // month - 1 to convert from 1-based to 0-based
       const key = `${completion.habit_id}-${dateKey}`
       completions[key] = true
+      console.log('Loading completion:', { dateStr, dateKey, key })
     }
     
     return completions
@@ -186,11 +188,13 @@ export async function toggleCompletion(habitId: string, date: Date): Promise<boo
     const user = await getAuthenticatedUser()
     const supabase = await createClient()
     
-    // Format date as YYYY-MM-DD using local timezone (not UTC)
+    // Format date as YYYY-MM-DD using local date components to avoid timezone issues
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
     const completedDate = `${year}-${month}-${day}`
+    
+    console.log('Toggling completion for:', { habitId, date, completedDate })
     
     // Check if completion already exists
     const { data: existing } = await supabase

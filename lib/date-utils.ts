@@ -18,21 +18,17 @@ export function getDayLetter(dayOfWeek: number): string {
 
 export function isToday(date: Date): boolean {
   const today = new Date()
-  return (
-    date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear()
-  )
+  // Normalize both dates to avoid any time component issues
+  const todayNormalized = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  const dateNormalized = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  return todayNormalized.getTime() === dateNormalized.getTime()
 }
 
 export function isYesterday(date: Date): boolean {
-  const yesterday = new Date()
-  yesterday.setDate(yesterday.getDate() - 1)
-  return (
-    date.getDate() === yesterday.getDate() &&
-    date.getMonth() === yesterday.getMonth() &&
-    date.getFullYear() === yesterday.getFullYear()
-  )
+  const today = new Date()
+  const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)
+  const dateNormalized = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  return yesterday.getTime() === dateNormalized.getTime()
 }
 
 export function isPastDay(date: Date): boolean {

@@ -40,7 +40,8 @@ const MONTHS = [
 ]
 
 export default function HabitTrackerDashboard() {
-  const today = useMemo(() => new Date(), [])
+  // Don't memoize 'today' to ensure it's always current
+  const today = new Date()
   const [selectedMonth, setSelectedMonth] = useState(today.getMonth())
   const [selectedYear] = useState(today.getFullYear())
   const { signOut } = useAuth()
@@ -135,11 +136,15 @@ export default function HabitTrackerDashboard() {
   // Handlers
   const handleToggleCompletion = useCallback(
     async (habitId: string, day: number) => {
-      const date = new Date(selectedYear, selectedMonth, day)
+      // Create a date object that represents the exact day without timezone issues
+      // Use noon (12:00) to avoid any midnight timezone edge cases
+      const date = new Date(selectedYear, selectedMonth, day, 12, 0, 0, 0)
       if (!isToday(date) && !isYesterday(date)) return
 
       const dateKey = `${selectedYear}-${selectedMonth}-${day}`
       const completionKey = `${habitId}-${dateKey}`
+      
+      console.log('Toggle completion:', { selectedYear, selectedMonth, day, date, dateKey })
       
       // Optimistic update - update UI immediately
       const wasCompleted = !!completions[completionKey]
