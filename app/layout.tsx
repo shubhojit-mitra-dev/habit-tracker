@@ -9,7 +9,7 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Habit Tracker",
+  title: "Habital",
   description: "A minimal habit tracking dashboard to build discipline and consistency",
 }
 
