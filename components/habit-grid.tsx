@@ -39,7 +39,7 @@ export function HabitGrid({
 
   return (
     <div className="min-w-max">
-      <div className="flex gap-1 mb-1 h-[28px] items-end">
+      <div className="flex gap-1 mb-1 h-7 items-end">
         {days.map((day) => {
           const dayOfWeek = getDayOfWeek(selectedYear, selectedMonth, day)
           return (
@@ -52,7 +52,7 @@ export function HabitGrid({
       </div>
 
       {habits.map((habit) => (
-        <div key={habit.id} className="flex gap-1 h-[26px] mb-1 items-center">
+        <div key={habit.id} className="flex gap-1 h-6.5 mb-1 items-center">
           {days.map((day) => {
             const dateKey = `${selectedYear}-${selectedMonth}-${day}`
             const completed = isHabitCompleted(habit.id, dateKey, completions)

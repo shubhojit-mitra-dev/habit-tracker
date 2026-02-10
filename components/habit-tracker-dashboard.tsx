@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardHeader } from "@/components/dashboard-header"
 import { HabitList } from "@/components/habit-list"
@@ -18,6 +18,7 @@ import {
   getHabitsCompletedPerDay,
   getDailyDisciplineScores,
 } from "@/lib/habit-utils"
+import { getHabits } from "@/lib/actions"
 
 const MONTHS = [
   "January",
@@ -34,20 +35,33 @@ const MONTHS = [
   "December",
 ]
 
-const DEFAULT_HABITS: Habit[] = [
-  { id: "1", name: "Exercise", isCore: true },
-  { id: "2", name: "Read 30 mins", isCore: true },
-  { id: "3", name: "Meditate", isCore: false },
-  { id: "4", name: "No junk food", isCore: true },
-  { id: "5", name: "Journal", isCore: false },
-]
-
 export default function HabitTrackerDashboard() {
   const today = useMemo(() => new Date(), [])
   const [selectedMonth, setSelectedMonth] = useState(today.getMonth())
   const [selectedYear] = useState(today.getFullYear())
-  const [habits, setHabits] = useState<Habit[]>(DEFAULT_HABITS)
+  const [habits, setHabits] = useState<Habit[]>([])
   const [completions, setCompletions] = useState<CompletionMatrix>({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Load habits from database
+  useEffect(() => {
+    async function loadHabits() {
+      try {
+        setLoading(true)
+        setError(null)
+        const userHabits = await getHabits()
+        setHabits(userHabits)
+      } catch (err) {
+        console.error('Failed to load habits:', err)
+        setError('Failed to load habits. Please try refreshing the page.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadHabits()
+  }, [])
 
   const daysInMonth = getDaysInMonth(selectedYear, selectedMonth)
   const firstDayOfMonth = getFirstDayOfMonth(selectedYear, selectedMonth)
@@ -134,16 +148,44 @@ export default function HabitTrackerDashboard() {
   return (
     <div className="dark min-h-screen bg-background text-foreground">
       <div className="mx-auto p-3 space-y-2">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div className="w-1/4 flex items-center justify-center">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Daily Dashboard</h1>
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center min-h-100">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading your habits...</p>
+            </div>
           </div>
-          {/* Summary Metrics */}
-          <DashboardHeader
-            currentStreak={currentStreak}
-            lastPerfectDay={lastPerfectDay ? formatDate(lastPerfectDay) : "N/A"}
-            disciplineScore={disciplineScore}
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="flex items-center justify-center min-h-100">
+            <div className="text-center">
+              <p className="text-red-500 mb-4">{error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Main Content - Only show when not loading and no error */}
+        {!loading && !error && (
+          <>
+            {/* Header Section */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+              <div className="w-1/4 flex items-center justify-center">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground">Daily Dashboard</h1>
+              </div>
+              {/* Summary Metrics */}
+              <DashboardHeader
+                currentStreak={currentStreak}
+                lastPerfectDay={lastPerfectDay ? formatDate(lastPerfectDay) : "N/A"}
+                disciplineScore={disciplineScore}
             selectedMonth={MONTHS[selectedMonth]}
             selectedMonthIndex={selectedMonth}
             onMonthChange={setSelectedMonth}
@@ -217,6 +259,8 @@ export default function HabitTrackerDashboard() {
             </div>
           </CardContent>
         </Card>
+          </>
+        )}
       </div>
     </div>
   )

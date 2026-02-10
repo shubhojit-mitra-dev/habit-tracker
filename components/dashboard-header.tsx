@@ -58,12 +58,12 @@ export function DashboardHeader({
                 <div className="font-semibold ml-2 text-foreground">
                   {metric.isSelect ? (
                     <Select value={selectedMonthIndex.toString()} onValueChange={(v) => onMonthChange(Number.parseInt(v))}>
-                      <SelectTrigger className="w-auto h-auto text-sm p-0 border-0 bg-transparent font-semibold text-foreground hover:bg-muted/50">
+                      <SelectTrigger className="w-auto h-auto text-sm px-2 border-0 bg-transparent font-semibold text-foreground hover:bg-muted/50">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {availableMonths.map((month, idx) => (
-                          <SelectItem key={month} value={idx.toString()}>
+                          <SelectItem className="px-4" key={month} value={idx.toString()}>
                             {month}
                           </SelectItem>
                         ))}

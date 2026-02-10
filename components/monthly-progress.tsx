@@ -41,7 +41,7 @@ export function MonthlyProgress({
         return (
           <div key={habit.id} className="space-y-1">
             <div className="flex justify-between text-xs">
-              <span className="text-foreground truncate max-w-[120px]">{habit.name}</span>
+              <span className="text-foreground truncate max-w-30">{habit.name}</span>
               <span className="text-muted-foreground">{progress}%</span>
             </div>
             <Progress value={progress} className="h-2" />
