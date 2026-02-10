@@ -11,10 +11,19 @@ interface HabitListProps {
   habits: Habit[]
   onAddHabit: () => void
   onUpdateHabit: (id: string, updates: Partial<Habit>) => void
+  onUpdateHabitImmediate: (id: string, updates: Partial<Habit>) => void
   onDeleteHabit: (id: string) => void
+  creatingHabit?: boolean
 }
 
-export function HabitList({ habits, onAddHabit, onUpdateHabit, onDeleteHabit }: HabitListProps) {
+export function HabitList({ 
+  habits, 
+  onAddHabit, 
+  onUpdateHabit, 
+  onUpdateHabitImmediate, 
+  onDeleteHabit, 
+  creatingHabit = false 
+}: HabitListProps) {
   return (
     <div className="w-full lg:w-48 space-y-1 shrink-0">
       <div className="text-sm font-medium text-muted-foreground mb-3">Habits</div>
@@ -24,13 +33,15 @@ export function HabitList({ habits, onAddHabit, onUpdateHabit, onDeleteHabit }: 
           <Input
             value={habit.name}
             onChange={(e) => onUpdateHabit(habit.id, { name: e.target.value })}
+            onBlur={(e) => onUpdateHabitImmediate(habit.id, { name: e.target.value })}
             className="h-6 text-sm bg-muted border-0 focus-visible:ring-1"
+            placeholder="Habit name..."
           />
           <div className="flex items-center gap-1">
             <Switch
               id={`core-${habit.id}`}
               checked={habit.isCore}
-              onCheckedChange={(checked) => onUpdateHabit(habit.id, { isCore: checked })}
+              onCheckedChange={(checked) => onUpdateHabitImmediate(habit.id, { isCore: checked })}
               className="scale-75"
             />
           </div>
@@ -50,9 +61,19 @@ export function HabitList({ habits, onAddHabit, onUpdateHabit, onDeleteHabit }: 
         size="sm"
         className="w-full justify-start text-muted-foreground hover:text-foreground mt-2"
         onClick={onAddHabit}
+        disabled={creatingHabit}
       >
-        <Plus className="h-4 w-4 mr-2" />
-        Add Habit
+        {creatingHabit ? (
+          <>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+            Creating...
+          </>
+        ) : (
+          <>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Habit
+          </>
+        )}
       </Button>
     </div>
   )

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback, useEffect } from "react"
+import { useState, useMemo, useCallback, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardHeader } from "@/components/dashboard-header"
 import { HabitList } from "@/components/habit-list"
@@ -18,7 +18,7 @@ import {
   getHabitsCompletedPerDay,
   getDailyDisciplineScores,
 } from "@/lib/habit-utils"
-import { getHabits } from "@/lib/actions"
+import { getHabits, createHabit, updateHabit } from "@/lib/actions"
 
 const MONTHS = [
   "January",
@@ -43,6 +43,10 @@ export default function HabitTrackerDashboard() {
   const [completions, setCompletions] = useState<CompletionMatrix>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [creatingHabit, setCreatingHabit] = useState(false)
+  
+  // Ref for debouncing habit updates
+  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Load habits from database
   useEffect(() => {
@@ -61,6 +65,15 @@ export default function HabitTrackerDashboard() {
     }
 
     loadHabits()
+  }, [])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current)
+      }
+    }
   }, [])
 
   const daysInMonth = getDaysInMonth(selectedYear, selectedMonth)
@@ -128,18 +141,82 @@ export default function HabitTrackerDashboard() {
     [selectedYear, selectedMonth],
   )
 
-  const handleAddHabit = useCallback(() => {
-    const newHabit: Habit = {
-      id: Date.now().toString(),
-      name: "New Habit",
-      isCore: false,
-    }
-    setHabits((prev) => [...prev, newHabit])
-  }, [])
+  const handleAddHabit = useCallback(async () => {
+    // Prevent multiple rapid clicks (debouncing)
+    if (creatingHabit) return
+    
+    try {
+      setCreatingHabit(true)
+      
+      // Optimistic update - add habit to UI immediately
+      const tempId = `temp-${Date.now()}`
+      const newHabit: Habit = {
+        id: tempId,
+        name: "New Habit",
+        isCore: false,
+      }
+      setHabits((prev) => [...prev, newHabit])
 
-  const handleUpdateHabit = useCallback((id: string, updates: Partial<Habit>) => {
+      // Create habit in database
+      const createdHabit = await createHabit("New Habit", false)
+
+      if (createdHabit) {
+        // Replace temporary habit with real habit from database
+        setHabits((prev) => 
+          prev.map(h => h.id === tempId ? createdHabit : h)
+        )
+      } else {
+        throw new Error('Failed to create habit')
+      }
+    } catch (err) {
+      console.error('Failed to create habit:', err)
+      // Remove optimistic update on error
+      setHabits((prev) => prev.filter(h => !h.id.startsWith('temp-')))
+      setError('Failed to create habit. Please try again.')
+    } finally {
+      setCreatingHabit(false)
+    }
+  }, [creatingHabit])
+
+  const handleUpdateHabit = useCallback((id: string, updates: Partial<Habit>, immediate: boolean = false) => {
+    // Always update local state immediately for good UX
     setHabits((prev) => prev.map((h) => (h.id === id ? { ...h, ...updates } : h)))
-  }, [])
+
+    // Clear existing timeout
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current)
+    }
+
+    // Update database with debouncing or immediately
+    const updateDatabase = async () => {
+      try {
+        const habit = habits.find(h => h.id === id)
+        if (!habit) return
+
+        const updatedHabit = { ...habit, ...updates }
+        await updateHabit(id, {
+          name: updatedHabit.name,
+          isCore: updatedHabit.isCore
+        })
+      } catch (err) {
+        console.error('Failed to update habit:', err)
+        setError('Failed to update habit. Please try again.')
+      }
+    }
+
+    if (immediate) {
+      // Update immediately (for onBlur events)
+      updateDatabase()
+    } else {
+      // Debounce for typing (wait 2 seconds after user stops typing)
+      updateTimeoutRef.current = setTimeout(updateDatabase, 2000)
+    }
+  }, [habits])
+
+  // Helper function for immediate updates (onBlur)
+  const handleUpdateHabitImmediate = useCallback((id: string, updates: Partial<Habit>) => {
+    handleUpdateHabit(id, updates, true)
+  }, [handleUpdateHabit])
 
   const handleDeleteHabit = useCallback((id: string) => {
     setHabits((prev) => prev.filter((h) => h.id !== id))
@@ -206,7 +283,9 @@ export default function HabitTrackerDashboard() {
                 habits={habits}
                 onAddHabit={handleAddHabit}
                 onUpdateHabit={handleUpdateHabit}
+                onUpdateHabitImmediate={handleUpdateHabitImmediate}
                 onDeleteHabit={handleDeleteHabit}
+                creatingHabit={creatingHabit}
               />
 
               {/* Center: Habit Grid */}
