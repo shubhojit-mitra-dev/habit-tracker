@@ -18,7 +18,7 @@ import {
   getHabitsCompletedPerDay,
   getDailyDisciplineScores,
 } from "@/lib/habit-utils"
-import { getHabits, createHabit, updateHabit, toggleCompletion, getCompletions } from "@/lib/actions"
+import { getHabits, createHabit, updateHabit, deleteHabit, toggleCompletion, getCompletions } from "@/lib/actions"
 
 const MONTHS = [
   "January",
@@ -260,9 +260,46 @@ export default function HabitTrackerDashboard() {
     handleUpdateHabit(id, updates, true)
   }, [handleUpdateHabit])
 
-  const handleDeleteHabit = useCallback((id: string) => {
+  const handleDeleteHabit = useCallback(async (id: string) => {
+    // Store the habit for potential rollback
+    const habitToDelete = habits.find(h => h.id === id)
+    if (!habitToDelete) return
+
+    // Store completions for potential rollback
+    const habitCompletions = Object.entries(completions)
+      .filter(([key]) => key.startsWith(`${id}-`))
+      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {})
+
+    // Optimistic update - remove from UI immediately
     setHabits((prev) => prev.filter((h) => h.id !== id))
-  }, [])
+    setCompletions((prev) => {
+      const newCompletions = { ...prev }
+      Object.keys(newCompletions).forEach(key => {
+        if (key.startsWith(`${id}-`)) {
+          delete newCompletions[key]
+        }
+      })
+      return newCompletions
+    })
+
+    try {
+      // Delete from database
+      const success = await deleteHabit(id)
+      
+      if (!success) {
+        // Restore habit and completions if delete failed
+        setHabits((prev) => [...prev, habitToDelete])
+        setCompletions((prev) => ({ ...prev, ...habitCompletions }))
+        setError('Failed to delete habit. Please try again.')
+      }
+    } catch (err) {
+      console.error('Failed to delete habit:', err)
+      // Restore habit and completions on error
+      setHabits((prev) => [...prev, habitToDelete])
+      setCompletions((prev) => ({ ...prev, ...habitCompletions }))
+      setError('Failed to delete habit. Please try again.')
+    }
+  }, [habits, completions])
 
   return (
     <div className="dark min-h-screen bg-background text-foreground">
