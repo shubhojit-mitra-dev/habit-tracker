@@ -29,7 +29,7 @@ export function AnalyticsCharts({
   }))
 
   return (
-    <div className="h-70 bg-card rounded-lg ">
+    <div className="h-70 bg-background rounded-lg ">
       <ResponsiveContainer width="100%" height="90%">
         <AreaChart data={data} margin={{ top: 60, right: 30, left: 0, bottom: 0 }}>
           <defs>
@@ -46,19 +46,19 @@ export function AnalyticsCharts({
           <XAxis
             dataKey="day"
             tick={{ fill: "white", fontSize: 12 }}
-            tickLine={{ stroke: "hsl(var(--border))" }}
-            axisLine={{ stroke: "hsl(var(--border))" }}
+            tickLine={{ stroke: "white" }}
+            axisLine={{ stroke: "white" }}
           />
           <YAxis
             yAxisId="left"
             tick={{ fill: "white", fontSize: 12 }}
-            tickLine={{ stroke: "hsl(var(--border))" }}
-            axisLine={{ stroke: "hsl(var(--border))" }}
+            tickLine={{ stroke: "white" }}
+            axisLine={{ stroke: "white" }}
             label={{
               value: "Habits",
               angle: -90,
               position: "insideLeft",
-              fill: "hsl(var(--foreground))",
+              fill: "white",
               fontSize: 12,
             }}
           />
@@ -73,7 +73,7 @@ export function AnalyticsCharts({
               value: "Score %",
               angle: 90,
               position: "insideRight",
-              fill: "hsl(var(--foreground))",
+              fill: "white",
               fontSize: 12,
             }}
           />
@@ -82,10 +82,10 @@ export function AnalyticsCharts({
               backgroundColor: "hsl(var(--card))",
               border: "1px solid hsl(var(--border))",
               borderRadius: "6px",
-              color: "hsl(var(--foreground))",
+              color: "white",
             }}
-            labelStyle={{ color: "hsl(var(--foreground))" }}
-            formatter={(value: number | undefined, name: string | undefined) => [
+            labelStyle={{ color: "white" }}
+            formatter={(value, name) => [
               value != null ? (name === "score" ? `${value}%` : value) : "N/A",
               name === "score" ? "Discipline Score" : "Habits Completed",
             ]}
@@ -94,7 +94,7 @@ export function AnalyticsCharts({
           <Legend
             wrapperStyle={{ paddingTop: "20px" }}
             formatter={(value) => (
-              <span style={{ color: "hsl(var(--foreground))" }}>
+              <span style={{ color: "white" }}>
                 {value === "habits" ? "Habits Completed" : "Discipline Score"}
               </span>
             )}

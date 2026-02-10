@@ -70,7 +70,7 @@ export function DashboardHeader({
                       </SelectContent>
                     </Select>
                   ) : (
-                   <p className="text-lg">{metric.value}</p>
+                  <p className="text-lg">{metric.value}</p>
                   )}
                 </div>
               </div>

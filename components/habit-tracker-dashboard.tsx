@@ -152,7 +152,7 @@ export default function HabitTrackerDashboard() {
         </div>
 
         {/* Main Grid Section */}
-        <Card className="bg-card rounded-none border-border pt-5 pb-5">
+        <Card className="bg-background rounded-none border-border pt-5 pb-5">
           <CardHeader>
             <CardTitle className="text-lg font-semibold">Daily Tracking</CardTitle>
           </CardHeader>
