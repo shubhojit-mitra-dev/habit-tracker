@@ -17,11 +17,11 @@ async function getAuthenticatedUser() {
 }
 
 // Convert database habit to client habit
-function toClientHabit(habit: Habit): Habit {
+function toClientHabit(habit: any): Habit {
   return {
     id: habit.id,
     name: habit.name,
-    isCore: habit.isCore,
+    isCore: habit.is_core, // Map database is_core to client isCore
   }
 }
 
@@ -166,8 +166,10 @@ export async function getCompletions(): Promise<Record<string, boolean>> {
     const completions: Record<string, boolean> = {}
     
     for (const completion of data || []) {
-      const date = new Date(completion.completed_date)
-      const dateKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+      // Parse the date string directly instead of creating Date object to avoid timezone issues
+      const dateStr = completion.completed_date // Already in YYYY-MM-DD format
+      const [year, month, day] = dateStr.split('-').map(Number)
+      const dateKey = `${year}-${month - 1}-${day}` // month - 1 because JS months are 0-based
       const key = `${completion.habit_id}-${dateKey}`
       completions[key] = true
     }
@@ -184,8 +186,11 @@ export async function toggleCompletion(habitId: string, date: Date): Promise<boo
     const user = await getAuthenticatedUser()
     const supabase = await createClient()
     
-    // Format date as YYYY-MM-DD
-    const completedDate = date.toISOString().split('T')[0]
+    // Format date as YYYY-MM-DD using local timezone (not UTC)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const completedDate = `${year}-${month}-${day}`
     
     // Check if completion already exists
     const { data: existing } = await supabase
