@@ -6,6 +6,7 @@ import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { CheckCircle, BarChart3, Calendar, Target } from 'lucide-react'
+import Loader from '@/components/ui/loader'
 
 export default function LandingPage() {
   const { user, loading } = useAuth()
@@ -21,7 +22,7 @@ export default function LandingPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-lg">Loading...</div>
+        <Loader />
       </div>
     )
   }

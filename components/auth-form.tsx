@@ -44,8 +44,8 @@ export function AuthForm({ mode, onToggleMode }: AuthFormProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <Card className="w-full max-w-md">
+    <div className="flex items-center justify-center min-h-screen">
+      <Card className="w-full max-w-md py-6">
         <CardHeader>
           <CardTitle>
             {mode === 'signin' ? 'Sign In' : 'Create Account'}

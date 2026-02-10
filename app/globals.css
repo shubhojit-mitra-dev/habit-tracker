@@ -143,6 +143,16 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none; /* Safari and Chrome */
 }
 
+/* Blue neon glow effect for Habital logo */
+.neon-glow {
+  text-shadow: 
+    0 0 3px #3b82f6,
+    0 0 5px #3b82f6,
+    0 0 8px #3b82f6;
+  color: #93c5fd;
+  filter: drop-shadow(0 0 5px #3b82f660);
+}
+
 /* Custom modern scrollbar */
 .modern-scrollbar {
   scrollbar-width: thin;

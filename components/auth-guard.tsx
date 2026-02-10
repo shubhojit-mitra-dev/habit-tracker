@@ -3,6 +3,7 @@
 import { useAuth } from '@/lib/auth-context'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import Loader from '@/components/ui/loader'
 
 interface AuthGuardProps {
   children: React.ReactNode
@@ -22,7 +23,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-lg">Loading...</div>
+        <Loader />
       </div>
     )
   }

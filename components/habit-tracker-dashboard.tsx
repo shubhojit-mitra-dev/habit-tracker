@@ -11,6 +11,7 @@ import { DayClassificationChart } from "@/components/day-classification-chart"
 import { AnalyticsCharts } from "@/components/analytics-charts"
 import { useAuth } from "@/lib/auth-context"
 import { Power } from "lucide-react"
+import Loader from "@/components/ui/loader"
 import type { Habit, CompletionMatrix } from "@/lib/types"
 import { getDaysInMonth, getFirstDayOfMonth, isToday, isYesterday, formatDate } from "@/lib/date-utils"
 import {
@@ -311,10 +312,7 @@ export default function HabitTrackerDashboard() {
         {/* Loading State */}
         {loading && (
           <div className="flex items-center justify-center min-h-screen">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading your habits...</p>
-            </div>
+            <Loader />
           </div>
         )}
 
@@ -338,8 +336,8 @@ export default function HabitTrackerDashboard() {
           <>
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center">
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">Daily Dashboard</h1>
+              <div className="flex items-center justify-center ml-10">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground">{"<Habital />"}</h1>
               </div>
               {/* Right Side - Metrics and Logout */}
               <div className="flex items-center gap-4">
@@ -358,7 +356,7 @@ export default function HabitTrackerDashboard() {
                   onClick={signOut}
                   size="sm"
                   variant="ghost"
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50 p-2"
+                  className="text-red-500 hover:text-red-600 hover:bg-red-50 px-4 py-4.5 cursor-pointer rounded-full border border-red-500"
                 >
                   <Power className="w-4 h-4" />
                 </Button>
@@ -372,7 +370,7 @@ export default function HabitTrackerDashboard() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Top Section: Habit tracking */}
-            <div className="flex flex-col lg:flex-row gap-2">
+            <div className="flex flex-col lg:flex-row gap-0">
               {/* Left: Habit List */}
               <HabitList
                 habits={habits}

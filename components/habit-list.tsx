@@ -37,7 +37,7 @@ export function HabitList({
   creatingHabit = false 
 }: HabitListProps) {
   return (
-    <div className="w-full lg:w-48 space-y-1 shrink-0">
+    <div className="w-full lg:w-52 space-y-1 shrink-0">
       <div className="text-sm font-medium text-muted-foreground mb-3">Habits</div>
 
       {habits.map((habit) => (
