@@ -7,7 +7,7 @@ export default function KineticDotsLoader() {
   const dots = 4; // Increased to 4 for better rhythm
 
   return (
-    <div className='flex items-center justify-center min-h-[250px] p-8 bg-slate-950/0'>
+    <div className='flex items-center justify-center min-h-62.6 p-8 bg-slate-950/0'>
       <div className='flex gap-5'>
         {[...Array(dots)].map((_, i) => (
           <div
@@ -24,7 +24,7 @@ export default function KineticDotsLoader() {
               }}
             >
               <div 
-                className='w-full h-full rounded-full bg-gradient-to-b from-cyan-300 to-blue-600 shadow-[0_0_15px_rgba(6,182,212,0.6)]'
+                className='w-full h-full rounded-full bg-linear-to-b from-cyan-300 to-blue-600 shadow-[0_0_15px_rgba(6,182,212,0.6)]'
                 style={{
                   animation: 'rubber-morph 1.4s linear infinite',
                   animationDelay: `${i * 0.15}s`,

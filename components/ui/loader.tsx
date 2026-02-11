@@ -4,7 +4,7 @@ export default function Loader() {
   const dots = 4
 
   return (
-    <div className='flex items-center justify-center min-h-[250px] p-8'>
+    <div className='flex items-center justify-center min-h-62.5 p-8'>
       <div className='flex gap-5'>
         {[...Array(dots)].map((_, i) => (
           <div
@@ -21,7 +21,7 @@ export default function Loader() {
               }}
             >
               <div 
-                className='w-full h-full rounded-full bg-gradient-to-b from-cyan-300 to-blue-600 shadow-[0_0_15px_rgba(6,182,212,0.6)]'
+                className='w-full h-full rounded-full bg-linear-to-b from-cyan-300 to-blue-600 shadow-[0_0_15px_rgba(6,182,212,0.6)]'
                 style={{
                   animation: 'rubber-morph 1.4s linear infinite',
                   animationDelay: `${i * 0.15}s`,
